@@ -19,7 +19,7 @@ Pour installer ce projet, suivez ces étapes :
 
 2) Clonez le dépôt GitHub sur votre machine :
 ```bash
-git clone [lien]
+git clone https://github.com/hugocollin/mlops
 ```
 
 3) Allez à la racine du projet dans votre terminal puis exécutez la commande suivante :
