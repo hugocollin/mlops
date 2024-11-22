@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+    mongo:
+        image: mongo
+
+    server:
+        image: mlops-server
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        ports:
+        - 8000:8000
+    
+    client:
+        image: mlops-client
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+        ports:
+        - 8501:8501
