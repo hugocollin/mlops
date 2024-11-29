@@ -6,6 +6,7 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 
 COPY model.pkl model.pkl
+COPY model.py model.py
 COPY app.py app.py
 
 CMD ["uvicorn", "--reload", "--host", "0.0.0.0", "app:app"]

@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+from model import Model
+
+from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from pymongo import MongoClient
 import joblib
 import numpy as np
+import threading
 
 app = FastAPI()
 client = MongoClient('mongo', 27017)
@@ -30,6 +33,26 @@ async def add_fruit(fruit: str):
 @app.get("/list")
 async def list_fruits():
     return {"results": list(collection.find({}, {"_id": False}))}
+
+@app.post("/train")
+def train_model():
+    try:
+        # Initialiser et entraîner le modèle
+        model_instance = Model()
+        best_params = model_instance.train()
+        test_score = model_instance.evaluate()
+        
+        # Charger le modèle entraîné
+        global model
+        model = joblib.load('model.pkl')
+        
+        return {
+            "message": "Model trained successfully!",
+            "best_params": best_params,
+            "test_score": test_score
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/predict")
 def predict(item: Item):
