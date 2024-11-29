@@ -6,7 +6,6 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 import joblib
 import numpy as np
-import threading
 
 app = FastAPI()
 client = MongoClient('mongo', 27017)

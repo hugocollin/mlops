@@ -53,7 +53,7 @@ class Model:
     
     def predict(self, X):
         # Chargement du modèle sauvegardé
-        model = joblib.load('../server/model.pkl')
+        model = joblib.load('model.pkl')
         return model.predict(X)
     
     def evaluate(self):

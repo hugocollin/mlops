@@ -23,15 +23,28 @@ with home:
 with train:
     st.subheader("Train the model")
 
-    if st.button("Train model 🚀"):
+    if st.button("Launch 🚀"):
         with st.spinner("Training in progress..."):
             try:
                 response = requests.post("http://server:8000/train")
                 if response.status_code == 200:
                     data = response.json()
-                    st.success("Model trained successfully!")
-                    st.write(f"**Best Parameters:** {data['best_params']}")
-                    st.write(f"**Test Score:** {data['test_score']:.4f}")
+                    st.toast("✅ Model trained successfully !")
+                    # Récupérer les données de réponse
+                    data = response.json()
+
+                    # Formater les meilleurs paramètres en liste à puces
+                    best_params_formatted = "\n".join([f"- **{key}**: {value}" for key, value in data['best_params'].items()])
+
+                    # Combiner les informations dans un seul message de succès
+                    success_message = f"""
+                    **Best parameters :**
+                    {best_params_formatted}
+
+                    **Accuracy** : **{data['test_score']:.4f}**
+                    """
+
+                    st.success(success_message)
                 else:
                     st.error(f"Error during training: {response.json()['detail']}")
             except Exception as e:
