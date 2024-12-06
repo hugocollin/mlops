@@ -4,7 +4,8 @@ from sklearn.ensemble import RandomForestClassifier
 import joblib
 
 class Model:
-    def __init__(self, param_grid=None, test_size=0.2, cv=5):
+    def __init__(self, param_grid=None, test_size=0.3, cv=5):
+        
         # Chargement du jeu de données Iris
         self.iris = load_iris()
         self.X, self.y = self.iris.data, self.iris.target
@@ -38,26 +39,24 @@ class Model:
         )
     
     def train(self):
-        # Entraînement du modèle avec GridSearchCV
+        # Entraînement du modèle
         self.grid_search.fit(self.X_train, self.y_train)
         
-        # Meilleurs paramètres
+        # Récupération des meilleurs paramètres
         best_params = self.grid_search.best_params_
-        print("Meilleurs paramètres :", best_params)
         
         # Sauvegarde du meilleur modèle
         joblib.dump(self.grid_search.best_estimator_, 'model.pkl')
-        print("Modèle entraîné et sauvegardé dans model.pkl")
 
         return best_params
+    
+    def evaluate(self):
+        # Évaluation du modèle sur les données de test
+        score = self.grid_search.score(self.X_test, self.y_test)
+        
+        return score
     
     def predict(self, X):
         # Chargement du modèle sauvegardé
         model = joblib.load('model.pkl')
         return model.predict(X)
-    
-    def evaluate(self):
-        # Évaluation du modèle sur les données de test
-        score = self.grid_search.score(self.X_test, self.y_test)
-        print(f"Score sur les données de test : {score}")
-        return score  # Ajouté
