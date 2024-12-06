@@ -5,11 +5,14 @@ import requests
 # Chargement du dataset Iris
 iris = load_iris()
 
+# Titre de l'application
 st.title("Random Forest Classifier")
 st.write("*for the Iris dataset*")
 
+# Création des onglets
 home, train, prediction, about = st.tabs(["Home", "Train", "Prediction", "About"])
 
+# Contenu de l'onglet "Home"
 with home:
     st.subheader("Home")
     st.write("This web application allows you to train a Random Forest Classifier on the Iris dataset and to make predictions on the species of an iris flower.")
@@ -31,10 +34,11 @@ with home:
 
     st.write("Enjoy ! 🔥")
 
+# Contenu de l'onglet "Train"
 with train:
     st.subheader("Train the model")
 
-    # Sliders pour les hyperparamètres
+    # Paramètres du modèle
     n_estimators_input = st.text_input("Number of estimators", "100,200,300")
     max_depth_input = st.text_input("Maximum depth of the trees", "10,20,30")
     min_samples_split_input = st.text_input("Minimum number of samples required to split a node", "2,5,10")
@@ -42,6 +46,7 @@ with train:
     test_size = st.slider("Test size", min_value=0.1, max_value=0.9, value=0.3, step=0.01)
     cv = st.slider("Number of folds for cross-validation", min_value=2, max_value=10, value=5, step=1)
 
+    # Bouton de lancement de l'entraînement
     if st.button("Launch training 🚀"):
         with st.spinner("Training in progress..."):
             try:
@@ -65,7 +70,7 @@ with train:
                     st.error("Please enter at least one valid value for the minimum number of samples required at a leaf node.")
                     st.stop()
 
-                # Préparer la charge utile avec les paramètres sélectionnés
+                # Préparation de la charge utile avec les paramètres sélectionnés
                 payload = {
                     "n_estimators": n_estimators,
                     "max_depth": max_depth,
@@ -75,6 +80,7 @@ with train:
                     "cv": cv
                 }
 
+                # Envoi de la requête POST au serveur
                 response = requests.post("http://server:8000/train", json=payload)
                 if response.status_code == 200:
                     data = response.json()
@@ -103,6 +109,7 @@ with train:
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
+# Contenu de l'onglet "Prediction"
 with prediction:
     st.subheader("Iris species prediction")
 
@@ -116,13 +123,16 @@ with prediction:
     min_petal_width = min(iris.data[:, 3])
     max_petal_width = max(iris.data[:, 3])
 
+    # Paramètres des caractéristiques de la fleur
     sepal_length = st.slider("Sepal length (cm)", min_value=min_sepal_length, max_value=max_sepal_length, value=5.84, step=0.01)
     sepal_width = st.slider("Sepal width (cm)", min_value=min_sepal_width, max_value=max_sepal_width, value=3.05, step=0.01)
     petal_length = st.slider("Petal length (cm)", min_value=min_petal_length, max_value=max_petal_length, value=3.75, step=0.01)
     petal_width = st.slider("Leaf width (cm)", min_value=min_petal_width, max_value=max_petal_width, value=1.20, step=0.01)
 
+    # Bouton de lancement de la prédiction
     if st.button("Launch prediction 🚀"):
         try:
+            # Envoi de la requête POST au serveur
             response = requests.post("http://server:8000/predict", json={
                 "sepal_length": sepal_length,
                 "sepal_width": sepal_width,
@@ -137,7 +147,8 @@ with prediction:
                 st.write("Error while predicting the iris species")
         except Exception as e:
             st.error(f"Une erreur est survenue : {e}")
-    
+
+# Contenu de l'onglet "About"
 with about:
     st.subheader("About")
     st.write("This app was made by me with ❤️")

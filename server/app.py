@@ -8,22 +8,25 @@ import joblib
 import numpy as np
 from typing import List
 
+# Initialisation de l'application FastAPI
 app = FastAPI()
 client = MongoClient('mongo', 27017)
 db = client.test_database
 collection = db.test_collection
 
+# Chargement du modèle sauvegardé
 try:
     model = joblib.load('model.pkl')
 except:
     model = None
 
-# Définir des types contraintes pour chaque hyperparamètre
+# Définition des contraintes pour les paramètres d'entraînement
 ConInt10_1000 = conint(ge=10, le=1000)
 ConInt1_100 = conint(ge=1, le=100)
 ConInt2_50 = conint(ge=2, le=50)
 ConInt1_50 = conint(ge=1, le=50)
 
+# Définition de la classe des paramètres d'entraînement du modèle
 class TrainParams(BaseModel):
     n_estimators: List[ConInt10_1000] = Field(..., description="Nombre d'estimateurs pour le Random Forest")
     max_depth: List[ConInt1_100] = Field(..., description="Profondeur maximale des arbres")
@@ -32,29 +35,34 @@ class TrainParams(BaseModel):
     test_size: float = Field(0.3, gt=0.0, lt=1.0, description="Fraction des données pour le test")
     cv: int = Field(5, ge=2, le=10, description="Nombre de folds pour la validation croisée")
 
+# Définition de la classe des paramètres des caractéristiques d'une fleur
 class Item(BaseModel):
     sepal_length: float
     sepal_width: float
     petal_length: float
     petal_width: float
 
+# Définition des routes de l'API
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
+# Ajout d'un fruit dans la base de données
 @app.get("/add/{fruit}")
 async def add_fruit(fruit: str):
     id = collection.insert_one({"fruit": fruit}).inserted_id 
     return {"id": str(id)}
 
+# Récupération de la liste des fruits
 @app.get("/list")
 async def list_fruits():
     return {"results": list(collection.find({}, {"_id": False}))}
 
+# Entraînement du modèle
 @app.post("/train")
 def train_model(params: TrainParams):
     try:
-        # Initialiser et entraîner le modèle avec les paramètres reçus
+        # Initialisation du modèle avec les paramètres d'entraînement
         model_instance = Model(
             n_estimators=params.n_estimators,
             max_depth=params.max_depth,
@@ -66,7 +74,7 @@ def train_model(params: TrainParams):
         best_params = model_instance.train()
         test_score = model_instance.evaluate()
         
-        # Charger le modèle entraîné
+        # Chargement du meilleur modèle
         global model
         model = joblib.load('model.pkl')
         
@@ -78,6 +86,7 @@ def train_model(params: TrainParams):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Prédiction de l'espèce d'une fleur
 @app.post("/predict")
 def predict(item: Item):
     if model is None:
