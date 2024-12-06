@@ -34,31 +34,67 @@ with home:
 with train:
     st.subheader("Train the model")
 
+    # Sliders pour les hyperparamètres
+    n_estimators_input = st.text_input("Number of estimators", "100,200,300")
+    max_depth_input = st.text_input("Maximum depth of the trees", "10,20,30")
+    min_samples_split_input = st.text_input("Minimum number of samples required to split a node", "2,5,10")
+    min_samples_leaf_input = st.text_input("Minimum number of samples required at a leaf node", "1,2,4")
+    test_size = st.slider("Test size", min_value=0.1, max_value=0.9, value=0.3, step=0.01)
+    cv = st.slider("Number of folds for cross-validation", min_value=2, max_value=10, value=5, step=1)
+
     if st.button("Launch training 🚀"):
         with st.spinner("Training in progress..."):
             try:
-                response = requests.post("http://server:8000/train")
+                # Conversion des entrées en listes de nombres
+                n_estimators = [int(x) for x in n_estimators_input.split(",") if x.strip().isdigit()]
+                max_depth = [int(x) for x in max_depth_input.split(",") if x.strip().isdigit()]
+                min_samples_split = [int(x) for x in min_samples_split_input.split(",") if x.strip().isdigit()]
+                min_samples_leaf = [int(x) for x in min_samples_leaf_input.split(",") if x.strip().isdigit()]
+
+                # Vérification des contraintes côté client (optionnel mais recommandé)
+                if not n_estimators:
+                    st.error("Please enter at least one valid value for the number of estimators.")
+                    st.stop()
+                if not max_depth:
+                    st.error("Please enter at least one valid value for the maximum depth of the trees.")
+                    st.stop()
+                if not min_samples_split:
+                    st.error("Please enter at least one valid value for the minimum number of samples required to split a node.")
+                    st.stop()
+                if not min_samples_leaf:
+                    st.error("Please enter at least one valid value for the minimum number of samples required at a leaf node.")
+                    st.stop()
+
+                # Préparer la charge utile avec les paramètres sélectionnés
+                payload = {
+                    "n_estimators": n_estimators,
+                    "max_depth": max_depth,
+                    "min_samples_split": min_samples_split,
+                    "min_samples_leaf": min_samples_leaf,
+                    "test_size": test_size,
+                    "cv": cv
+                }
+
+                response = requests.post("http://server:8000/train", json=payload)
                 if response.status_code == 200:
                     data = response.json()
                     st.toast("✅ Model trained successfully !")
-                    # Récupérer les données de réponse
-                    data = response.json()
 
-                    # Récupération des meilleurs paramètres
+                    # Récupération des meilleurs paramètres et de l'accuracy
                     best_params = data['best_params']
-                    n_estimators = best_params['n_estimators']
-                    max_depth = best_params['max_depth']
-                    min_samples_split = best_params['min_samples_split']
-                    min_samples_leaf = best_params['min_samples_leaf']
+                    n_estimators_best = best_params['n_estimators']
+                    max_depth_best = best_params['max_depth']
+                    min_samples_split_best = best_params['min_samples_split']
+                    min_samples_leaf_best = best_params['min_samples_leaf']
                     accuracy = data['test_score']
 
                     # Affichage des meilleurs paramètres
                     success_message = f"""
                     **Best parameters :**\n
-                    - n_estimators : {n_estimators}\n
-                    - max_depth : {max_depth}\n
-                    - min_samples_split : {min_samples_split}\n
-                    - min_samples_leaf : {min_samples_leaf}\n
+                    - n_estimators : {n_estimators_best}\n
+                    - max_depth : {max_depth_best}\n
+                    - min_samples_split : {min_samples_split_best}\n
+                    - min_samples_leaf : {min_samples_leaf_best}\n
                     """
                     st.success(success_message)
                     st.success(f"**Accuracy : {accuracy:.4f}**")
@@ -86,23 +122,21 @@ with prediction:
     petal_width = st.slider("Leaf width (cm)", min_value=min_petal_width, max_value=max_petal_width, value=1.20, step=0.01)
 
     if st.button("Launch prediction 🚀"):
-        response = requests.post("http://server:8000/predict", json={
-            "sepal_length": sepal_length,
-            "sepal_width": sepal_width,
-            "petal_length": petal_length,
-            "petal_width": petal_width
-        })
-        if response.status_code == 200:
-            prediction = response.json()["prediction"]
-            if prediction == 0:
-                prediction = "Setosa"
-            elif prediction == 1:
-                prediction = "Versicolor"
-            elif prediction == 2:
-                prediction = "Virginica"
-            st.write(f"The predicted iris species is : {prediction}")
-        else:
-            st.write("Error while predicting the iris species")
+        try:
+            response = requests.post("http://server:8000/predict", json={
+                "sepal_length": sepal_length,
+                "sepal_width": sepal_width,
+                "petal_length": petal_length,
+                "petal_width": petal_width
+            })
+            if response.status_code == 200:
+                prediction = response.json()["prediction"]
+                species = ["Setosa", "Versicolor", "Virginica"]
+                st.write(f"The predicted iris species is : {species[prediction]}")
+            else:
+                st.write("Error while predicting the iris species")
+        except Exception as e:
+            st.error(f"Une erreur est survenue : {e}")
     
 with about:
     st.subheader("About")

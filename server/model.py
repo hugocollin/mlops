@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 import joblib
 
 class Model:
-    def __init__(self, param_grid=None, test_size=0.3, cv=5):
+    def __init__(self, n_estimators, max_depth, min_samples_split, min_samples_leaf, test_size=0.3, cv=5):
         
         # Chargement du jeu de données Iris
         self.iris = load_iris()
@@ -15,25 +15,26 @@ class Model:
             self.X, self.y, test_size=test_size, random_state=1
         )
         
-        # Définition de la grille des hyperparamètres
-        if param_grid is None:
-            self.param_grid = {
-                'n_estimators': [100, 200, 300],
-                'max_depth': [None, 10, 20, 30],
-                'min_samples_split': [2, 5, 10],
-                'min_samples_leaf': [1, 2, 4]
-            }
-        else:
-            self.param_grid = param_grid
+        # Définition des hyperparamètres
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.min_samples_leaf = min_samples_leaf
+        self.cv = cv
         
         # Initialisation du modèle RandomForestClassifier
         self.rf = RandomForestClassifier(random_state=1)
         
-        # Initialisation de GridSearchCV
+        # Initialisation de GridSearchCV avec les listes de paramètres
         self.grid_search = GridSearchCV(
             estimator=self.rf,
-            param_grid=self.param_grid,
-            cv=cv,
+            param_grid={
+                'n_estimators': self.n_estimators,
+                'max_depth': self.max_depth,
+                'min_samples_split': self.min_samples_split,
+                'min_samples_leaf': self.min_samples_leaf
+            },
+            cv=self.cv,
             n_jobs=-1,
             verbose=2
         )
