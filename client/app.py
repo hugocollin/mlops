@@ -23,13 +23,13 @@ with home:
     st.subheader("Home")
     st.write("This web application allows you to train a Random Forest Classifier on the Iris dataset and to make predictions on the species of an iris flower.")
 
-    st.write("The Iris dataset contains 150 samples of iris flowers. Each sample contains the following features:")
+    st.write("The Iris dataset contains 150 samples of iris flowers. Each sample contains the following features :")
     st.write("- Sepal length (cm)")
     st.write("- Sepal width (cm)")
     st.write("- Petal length (cm)")
     st.write("- Petal width (cm)")
 
-    st.write("The target variable is the species of the iris flower. There are three possible species:")
+    st.write("The target variable is the species of the iris flower. There are three possible species :")
     st.write("- Setosa")
     st.write("- Versicolor")
     st.write("- Virginica")
