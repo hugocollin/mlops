@@ -5,6 +5,12 @@ import requests
 # Chargement du dataset Iris
 iris = load_iris()
 
+# Configuration de la page Streamlit
+st.set_page_config(
+    page_title="Random Forest Classifier",
+    page_icon="🌸"
+)
+
 # Titre de l'application
 st.title("Random Forest Classifier")
 st.write("*for the Iris dataset*")
@@ -41,6 +47,7 @@ with train:
     # Paramètres du modèle
     n_estimators_input = st.text_input("Number of estimators", "100,200,300")
     max_depth_input = st.text_input("Maximum depth of the trees", "10,20,30")
+    include_none = st.checkbox("Include 'None' value for max depth", value=False)
     min_samples_split_input = st.text_input("Minimum number of samples required to split a node", "2,5,10")
     min_samples_leaf_input = st.text_input("Minimum number of samples required at a leaf node", "1,2,4")
     test_size = st.slider("Test size", min_value=0.1, max_value=0.9, value=0.3, step=0.01)
@@ -53,6 +60,8 @@ with train:
                 # Conversion des entrées en listes de nombres
                 n_estimators = [int(x) for x in n_estimators_input.split(",") if x.strip().isdigit()]
                 max_depth = [int(x) for x in max_depth_input.split(",") if x.strip().isdigit()]
+                if include_none:
+                    max_depth.append(None)
                 min_samples_split = [int(x) for x in min_samples_split_input.split(",") if x.strip().isdigit()]
                 min_samples_leaf = [int(x) for x in min_samples_leaf_input.split(",") if x.strip().isdigit()]
 
@@ -142,7 +151,16 @@ with prediction:
             if response.status_code == 200:
                 prediction = response.json()["prediction"]
                 species = ["Setosa", "Versicolor", "Virginica"]
+                species_name = species[prediction]
                 st.write(f"The predicted iris species is : {species[prediction]}")
+
+                if species_name == "Setosa":
+                    image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Irissetosa1.jpg"
+                elif species_name == "Versicolor":
+                    image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Iris_versicolor_1.jpg/1280px-Iris_versicolor_1.jpg"
+                else:
+                    image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Iris_virginica_2.jpg/1200px-Iris_virginica_2.jpg"
+                st.image(image_url, caption=f"Iris {species_name}", use_container_width=True)
             else:
                 st.write("Error while predicting the iris species")
         except Exception as e:

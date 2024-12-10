@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, conint
 from pymongo import MongoClient
 import joblib
 import numpy as np
-from typing import List
+from typing import List, Optional
 
 # Initialisation de l'application FastAPI
 app = FastAPI()
@@ -28,12 +28,12 @@ ConInt1_50 = conint(ge=1, le=50)
 
 # Définition de la classe des paramètres d'entraînement du modèle
 class TrainParams(BaseModel):
-    n_estimators: List[ConInt10_1000] = Field(..., description="Nombre d'estimateurs pour le Random Forest")
-    max_depth: List[ConInt1_100] = Field(..., description="Profondeur maximale des arbres")
-    min_samples_split: List[ConInt2_50] = Field(..., description="Nombre minimum d'échantillons requis pour diviser un nœud")
-    min_samples_leaf: List[ConInt1_50] = Field(..., description="Nombre minimum d'échantillons requis à une feuille")
-    test_size: float = Field(0.3, gt=0.0, lt=1.0, description="Fraction des données pour le test")
-    cv: int = Field(5, ge=2, le=10, description="Nombre de folds pour la validation croisée")
+    n_estimators: List[ConInt10_1000] = Field(...)
+    max_depth: List[Optional[ConInt1_100]] = Field(...)
+    min_samples_split: List[ConInt2_50] = Field(...)
+    min_samples_leaf: List[ConInt1_50] = Field(...)
+    test_size: float = Field(0.3, gt=0.0, lt=1.0)
+    cv: int = Field(5, ge=2, le=10)
 
 # Définition de la classe des paramètres des caractéristiques d'une fleur
 class Item(BaseModel):

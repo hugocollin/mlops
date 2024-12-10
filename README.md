@@ -27,15 +27,6 @@ git clone https://github.com/hugocollin/mlops
 docker-compose up --build
 ```
 
-- Container Mongo qui stocke les prédictions utilisateur
-- API renvoie les images de la prédiction de fleur
-- Une page supplémentaire pour afficher les métriques d'apprentissage du modèle (AUC, PR...)
-- Train plusieurs modèles (SVM, Decision Tree, XGBoost....) et choisir un modèle pour la prédiction avec une selectbox
-- Uploader fichier CSV pour faire de la prédiction par lots
-- Exporter sur huggingface spaces / streamlit cloud
-- train.py à exécuter dans un container Docker et stock en local via un volume
-- Déployer sur Kubernetes avec Minikube
-
 ## Utilisation
 
 
