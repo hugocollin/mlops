@@ -2,6 +2,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 import joblib
+import os
 
 class Model:
     def __init__(self, n_estimators, max_depth, min_samples_split, min_samples_leaf, test_size=0.3, cv=5):
@@ -46,8 +47,11 @@ class Model:
         # Récupération des meilleurs paramètres
         best_params = self.grid_search.best_params_
         
+        # Chemin absolu pour sauvegarder le modèle
+        model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+        
         # Sauvegarde du meilleur modèle
-        joblib.dump(self.grid_search.best_estimator_, 'model.pkl')
+        joblib.dump(self.grid_search.best_estimator_, model_path)
 
         return best_params
     
@@ -58,6 +62,8 @@ class Model:
         return score
     
     def predict(self, X):
-        # Chargement du modèle sauvegardé
-        model = joblib.load('model.pkl')
+        # Chemin absolu pour charger le modèle sauvegardé
+        model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+        model = joblib.load(model_path)
+
         return model.predict(X)

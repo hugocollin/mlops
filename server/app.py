@@ -7,6 +7,12 @@ from pymongo import MongoClient
 import joblib
 import numpy as np
 from typing import List, Optional
+import os
+import logging
+
+# Configuration du logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialisation de l'application FastAPI
 app = FastAPI()
@@ -14,10 +20,15 @@ client = MongoClient('mongo', 27017)
 db = client.test_database
 collection = db.test_collection
 
+# Chemin absolu pour model.pkl
+model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+
 # Chargement du modèle sauvegardé
 try:
-    model = joblib.load('model.pkl')
-except:
+    model = joblib.load(model_path)
+    logger.info("Model loaded successfully")
+except Exception as e:
+    logger.error(f"An error occurred while loading the model: {e}")
     model = None
 
 # Définition des contraintes pour les paramètres d'entraînement
@@ -76,7 +87,7 @@ def train_model(params: TrainParams):
         
         # Chargement du meilleur modèle
         global model
-        model = joblib.load('model.pkl')
+        model = joblib.load(model_path)
         
         return {
             "message": "Model trained successfully !",
@@ -91,7 +102,11 @@ def train_model(params: TrainParams):
 def predict(item: Item):
     if model is None:
         raise HTTPException(status_code=400, detail="Model not trained yet")
-    item_data = jsonable_encoder(item)
-    features = np.array([[item.sepal_length, item.sepal_width, item.petal_length, item.petal_width]])
-    prediction = model.predict(features)
-    return {"prediction": int(prediction[0])}
+    try:
+        item_data = jsonable_encoder(item)
+        features = np.array([[item.sepal_length, item.sepal_width, item.petal_length, item.petal_width]])
+        prediction = model.predict(features)
+        return {"prediction": int(prediction[0])}
+    except Exception as e:
+        logger.error(f"Error during prediction: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
