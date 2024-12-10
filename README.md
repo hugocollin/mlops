@@ -88,5 +88,5 @@ All contributions are welcome. Here's how you can help :
 4. Push to the branch (`git push origin feature/AmazingFeature`).
 5. Open a pull request.  
 
-## Authors
+## Author
 This project was developed by COLLIN Hugo a student from the Master 2 SISE program at the University of Lyon 2.
