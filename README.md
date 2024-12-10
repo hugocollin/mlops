@@ -25,20 +25,22 @@ This project is an MLOps application designed to streamline the training, evalua
 
 - **Dockerized deployment** : Both the client and server applications are containerized using Docker, ensuring consistent environments across different setups and simplifying the deployment process with Docker Compose.
 
-### Project Structure
+### Project structure
 
-- **client/**
-  - [app.py](client/app.py) - Streamlit frontend application
-  - [Dockerfile](client/Dockerfile) - Docker configuration for the client
-  - [requirements.txt](client/requirements.txt) - Python dependencies for the client
-- **server/**
-  - [app.py](server/app.py) - FastAPI backend application
-  - [model.py](server/model.py) - Model training and prediction logic
-  - [model.pkl](server/model.pkl) - Serialized trained model
-  - [Dockerfile](server/Dockerfile) - Docker configuration for the server
-  - [requirements.txt](server/requirements.txt) - Python dependencies for the server
-- [docker-compose.yml](docker-compose.yml) - Docker Compose configuration to orchestrate services
-- [README.md](README.md) - Project documentation
+```bash
+├── client/
+│   ├── app.py              # Streamlit frontend application
+│   ├── Dockerfile          # Docker configuration for the client
+│   └── requirements.txt    # Python dependencies for the client
+├── server/
+│   ├── app.py              # FastAPI backend application
+│   ├── model.py            # Model training and prediction logic
+│   ├── model.pkl           # Serialized trained model
+│   ├── Dockerfile          # Docker configuration for the server
+│   └── requirements.txt    # Python dependencies for the server
+├── docker-compose.yml      # Docker Compose configuration to orchestrate services
+└── README.md               # Project documentation
+```
 
 ## Installation
 1. To run this project, you will need to have Docker Desktop installed on your machine (https://www.docker.com/products/docker-desktop/)
