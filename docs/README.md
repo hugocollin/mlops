@@ -3,11 +3,11 @@
 ## Table of contents
 - [Description](#description)
 - [Key Features](#key-features)
-- [Project Structure](#project-structure)
+- [Project structure](#project-structure)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contribution](#contribution)
-- [Authors](#authors)
+- [Author](#author)
 
 ## Description
 
@@ -32,18 +32,23 @@ This project is an MLOps application designed to streamline the training, evalua
 │   ├── app.py              # Streamlit frontend application
 │   ├── Dockerfile          # Docker configuration for the client
 │   └── requirements.txt    # Python dependencies for the client
+├── docs/
+│   └── README.md           # Project documentation
 ├── server/
 │   ├── app.py              # FastAPI backend application
-│   ├── model.py            # Model training and prediction logic
-│   ├── model.pkl           # Serialized trained model
 │   ├── Dockerfile          # Docker configuration for the server
+│   ├── model.pkl           # Serialized trained model
+│   ├── model.py            # Model training and prediction logic
 │   └── requirements.txt    # Python dependencies for the server
 ├── combined_app.py         # Combined client and server application for Streamlit Cloud deployment
 ├── docker-compose.yml      # Docker Compose configuration to orchestrate services
-└── README.md               # Project documentation
+└── requirements.txt        # Python dependencies for Streamlit Cloud deployment
 ```
 
 ## Installation
+
+To run this project on your local machine, follow these steps :
+
 1. To run this project, you will need to have Docker Desktop installed on your machine (https://www.docker.com/products/docker-desktop/)
 
 2. Clone the repository by running the following command in your terminal :
@@ -55,6 +60,8 @@ git clone https://github.com/hugocollin/mlops
 ```bash
 docker-compose up --build
 ```
+
+You can also run the online version of the application : hugocollin-mlops.streamlit.app
 
 ## Usage
 
@@ -90,4 +97,5 @@ All contributions are welcome. Here's how you can help :
 5. Open a pull request.  
 
 ## Author
+
 This project was developed by COLLIN Hugo a student from the Master 2 SISE program at the University of Lyon 2.
