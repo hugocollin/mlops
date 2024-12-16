@@ -1,9 +1,9 @@
-from sklearn.datasets import load_iris
-import streamlit as st
 import joblib
 import numpy as np
+from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, train_test_split
+import streamlit as st
 import os
 import logging
 
