@@ -38,8 +38,8 @@ This project is an MLOps application designed to streamline the training, evalua
 │   ├── model.pkl           # Serialized trained model
 │   ├── Dockerfile          # Docker configuration for the server
 │   └── requirements.txt    # Python dependencies for the server
-├── docker-compose.yml      # Docker Compose configuration to orchestrate services
 ├── combined_app.py         # Combined client and server application for Streamlit Cloud deployment
+├── docker-compose.yml      # Docker Compose configuration to orchestrate services
 └── README.md               # Project documentation
 ```
 
