@@ -1,9 +1,50 @@
 from sklearn.datasets import load_iris
 import streamlit as st
-import requests
+import joblib
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV, train_test_split
+import os
+import logging
+
+# Configuration du logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Chargement du dataset Iris
 iris = load_iris()
+X, y = iris.data, iris.target
+
+# Chemin absolu pour model.pkl
+model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+
+# Fonction d'entraînement du modèle
+def train_model(params):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=params['test_size'], random_state=42)
+    clf = RandomForestClassifier()
+    grid = GridSearchCV(
+        estimator=clf,
+        param_grid={
+            'n_estimators': params['n_estimators'],
+            'max_depth': params['max_depth'],
+            'min_samples_split': params['min_samples_split'],
+            'min_samples_leaf': params['min_samples_leaf']
+        },
+        cv=params['cv']
+    )
+    grid.fit(X_train, y_train)
+    joblib.dump(grid.best_estimator_, model_path)
+    accuracy = grid.score(X_test, y_test)
+    return grid.best_params_, accuracy
+
+# Fonction de prédiction
+def predict_species(features):
+    if not os.path.exists(model_path):
+        return None, "Modèle non entraîné."
+    model = joblib.load(model_path)
+    prediction = model.predict([features])[0]
+    species = ["Setosa", "Versicolor", "Virginica"]
+    return species[prediction], None
 
 # Configuration de la page Streamlit
 st.set_page_config(
@@ -65,7 +106,7 @@ with train:
                 min_samples_split = [int(x) for x in min_samples_split_input.split(",") if x.strip().isdigit()]
                 min_samples_leaf = [int(x) for x in min_samples_leaf_input.split(",") if x.strip().isdigit()]
 
-                # Vérification des contraintes côté client (optionnel mais recommandé)
+                # Vérification des contraintes côté client
                 if not n_estimators:
                     st.error("Please enter at least one valid value for the number of estimators.")
                     st.stop()
@@ -79,8 +120,8 @@ with train:
                     st.error("Please enter at least one valid value for the minimum number of samples required at a leaf node.")
                     st.stop()
 
-                # Préparation de la charge utile avec les paramètres sélectionnés
-                payload = {
+                # Préparation des paramètres
+                params = {
                     "n_estimators": n_estimators,
                     "max_depth": max_depth,
                     "min_samples_split": min_samples_split,
@@ -89,32 +130,20 @@ with train:
                     "cv": cv
                 }
 
-                # Envoi de la requête POST au serveur
-                response = requests.post("http://server:8000/train", json=payload)
-                if response.status_code == 200:
-                    data = response.json()
-                    st.toast("✅ Model trained successfully !")
+                # Entraînement du modèle
+                best_params, accuracy = train_model(params)
+                st.success("✅ Model trained successfully !")
 
-                    # Récupération des meilleurs paramètres et de l'accuracy
-                    best_params = data['best_params']
-                    n_estimators_best = best_params['n_estimators']
-                    max_depth_best = best_params['max_depth']
-                    min_samples_split_best = best_params['min_samples_split']
-                    min_samples_leaf_best = best_params['min_samples_leaf']
-                    accuracy = data['test_score']
-
-                    # Affichage des meilleurs paramètres
-                    success_message = f"""
-                    **Best parameters :**\n
-                    - n_estimators : {n_estimators_best}\n
-                    - max_depth : {max_depth_best}\n
-                    - min_samples_split : {min_samples_split_best}\n
-                    - min_samples_leaf : {min_samples_leaf_best}\n
-                    """
-                    st.success(success_message)
-                    st.success(f"**Accuracy : {accuracy:.4f}**")
-                else:
-                    st.error(f"Error during training: {response.json()['detail']}")
+                # Affichage des meilleurs paramètres
+                success_message = f"""
+                **Best parameters :**\n
+                - n_estimators : {best_params['n_estimators']}\n
+                - max_depth : {best_params['max_depth']}\n
+                - min_samples_split : {best_params['min_samples_split']}\n
+                - min_samples_leaf : {best_params['min_samples_leaf']}\n
+                """
+                st.success(success_message)
+                st.success(f"**Accuracy : {accuracy:.4f}**")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
@@ -136,35 +165,24 @@ with prediction:
     sepal_length = st.slider("Sepal length (cm)", min_value=min_sepal_length, max_value=max_sepal_length, value=5.84, step=0.01)
     sepal_width = st.slider("Sepal width (cm)", min_value=min_sepal_width, max_value=max_sepal_width, value=3.05, step=0.01)
     petal_length = st.slider("Petal length (cm)", min_value=min_petal_length, max_value=max_petal_length, value=3.75, step=0.01)
-    petal_width = st.slider("Leaf width (cm)", min_value=min_petal_width, max_value=max_petal_width, value=1.20, step=0.01)
+    petal_width = st.slider("Petal width (cm)", min_value=min_petal_width, max_value=max_petal_width, value=1.20, step=0.01)
 
     # Bouton de lancement de la prédiction
     if st.button("Launch prediction 🚀"):
-        try:
-            # Envoi de la requête POST au serveur
-            response = requests.post("http://server:8000/predict", json={
-                "sepal_length": sepal_length,
-                "sepal_width": sepal_width,
-                "petal_length": petal_length,
-                "petal_width": petal_width
-            })
-            if response.status_code == 200:
-                prediction = response.json()["prediction"]
-                species = ["Setosa", "Versicolor", "Virginica"]
-                species_name = species[prediction]
-                st.success(f"The predicted iris species is : {species[prediction]}")
+        with st.spinner("Predicting..."):
+            species, error = predict_species([sepal_length, sepal_width, petal_length, petal_width])
+            if error:
+                st.error(error)
+            else:
+                st.success(f"The predicted iris species is : **{species}**")
 
-                if species_name == "Setosa":
+                if species == "Setosa":
                     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Irissetosa1.jpg"
-                elif species_name == "Versicolor":
+                elif species == "Versicolor":
                     image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Iris_versicolor_1.jpg/1280px-Iris_versicolor_1.jpg"
                 else:
                     image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Iris_virginica_2.jpg/1200px-Iris_virginica_2.jpg"
-                st.image(image_url, caption=f"Iris {species_name}", use_container_width=True)
-            else:
-                st.write("Error while predicting the iris species")
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+                st.image(image_url, caption=f"Iris {species}", use_container_width=True)
 
 # Contenu de l'onglet "About"
 with about:
