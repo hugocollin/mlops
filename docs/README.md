@@ -61,7 +61,7 @@ git clone https://github.com/hugocollin/mlops
 docker-compose up --build
 ```
 
-You can also run the online version of the application : hugocollin-mlops.streamlit.app
+You can also run the online version of the application : https://hugocollin-mlops.streamlit.app
 
 ## Usage
 
